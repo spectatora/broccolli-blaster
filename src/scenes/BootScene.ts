@@ -59,6 +59,13 @@ export default class BootScene extends Phaser.Scene {
     burgerGraphics.fillRect(6, 16, 36, 4);
     burgerGraphics.generateTexture('enemy_burger', 48, 32);
     burgerGraphics.destroy();
+
+    // Particle sprite for explosions
+    const particleGraphics = this.add.graphics();
+    particleGraphics.fillStyle(0xffffff, 1);
+    particleGraphics.fillCircle(4, 4, 4);
+    particleGraphics.generateTexture('particle', 8, 8);
+    particleGraphics.destroy();
   }
 
   create(): void {

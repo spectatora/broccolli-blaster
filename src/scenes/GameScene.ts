@@ -99,6 +99,8 @@ export default class GameScene extends Phaser.Scene {
     const killed = enemy.takeDamage(1);
     if (killed) {
       gameState.addScore(enemy.scoreValue);
+      // Create particle explosion
+      this.createExplosion(enemy.x, enemy.y, enemy.enemyType);
       // Play explosion sound
       this.soundManager.playExplosion();
       // Screen shake on enemy death
@@ -213,9 +215,14 @@ export default class GameScene extends Phaser.Scene {
     // Massive screen shake for bomb
     this.cameras.main.shake(300, 0.01);
     
+    // Flash effect
+    this.cameras.main.flash(200, 255, 255, 200);
+    
     const enemies = this.spawner.getAllEnemies();
     enemies.forEach(enemy => {
       if (enemy.enemyType === 'fries' || enemy.enemyType === 'soda') {
+        // Create explosion before destroying
+        this.createExplosion(enemy.x, enemy.y, enemy.enemyType);
         gameState.addScore(enemy.scoreValue);
         enemy.takeDamage(999);
       }
@@ -283,5 +290,42 @@ export default class GameScene extends Phaser.Scene {
     if (bullet) {
       bullet.fire(this.player.x, this.player.y - 20, -90 + angleOffset);
     }
+  }
+
+  private createExplosion(x: number, y: number, enemyType: string): void {
+    // Determine particle color based on enemy type
+    let particleColor = 0xFFFFFF;
+    switch (enemyType) {
+      case 'fries':
+        particleColor = 0xFFD700; // Gold
+        break;
+      case 'soda':
+        particleColor = 0xFF4444; // Red
+        break;
+      case 'burger':
+        particleColor = 0x8B4513; // Brown
+        break;
+    }
+
+    // Create particles
+    const particles = this.add.particles(x, y, 'particle', {
+      speed: { min: 100, max: 300 },
+      angle: { min: 0, max: 360 },
+      scale: { start: 1, end: 0 },
+      alpha: { start: 1, end: 0 },
+      lifespan: 500,
+      gravityY: 200,
+      quantity: 15,
+      tint: particleColor,
+      emitting: false
+    });
+
+    // Emit burst
+    particles.explode(15);
+
+    // Destroy emitter after particles die
+    this.time.delayedCall(600, () => {
+      particles.destroy();
+    });
   }
 }
