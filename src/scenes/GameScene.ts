@@ -101,6 +101,8 @@ export default class GameScene extends Phaser.Scene {
       gameState.addScore(enemy.scoreValue);
       // Create particle explosion
       this.createExplosion(enemy.x, enemy.y, enemy.enemyType);
+      // Create floating score text
+      this.createFloatingScore(enemy.x, enemy.y, enemy.scoreValue);
       // Play explosion sound
       this.soundManager.playExplosion();
       // Screen shake on enemy death
@@ -326,6 +328,30 @@ export default class GameScene extends Phaser.Scene {
     // Destroy emitter after particles die
     this.time.delayedCall(600, () => {
       particles.destroy();
+    });
+  }
+
+  private createFloatingScore(x: number, y: number, scoreValue: number): void {
+    // Create floating text showing score
+    const scoreText = this.add.text(x, y, `+${scoreValue}`, {
+      fontSize: '24px',
+      fontFamily: 'Arial',
+      color: '#FFFF00',
+      stroke: '#000000',
+      strokeThickness: 4,
+      fontStyle: 'bold'
+    }).setOrigin(0.5);
+
+    // Animate text floating up and fading out
+    this.tweens.add({
+      targets: scoreText,
+      y: y - 60,
+      alpha: 0,
+      duration: 800,
+      ease: 'Cubic.easeOut',
+      onComplete: () => {
+        scoreText.destroy();
+      }
     });
   }
 }
