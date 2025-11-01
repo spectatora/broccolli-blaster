@@ -5,21 +5,11 @@ import Phaser from 'phaser';
  * Creates procedurally generated sound effects
  */
 export class SoundManager {
-  private scene: Phaser.Scene;
-  private sounds: Map<string, Phaser.Sound.BaseSound> = new Map();
   private enabled: boolean = true;
 
   constructor(scene: Phaser.Scene) {
-    this.scene = scene;
-    this.createSounds();
-  }
-
-  private createSounds(): void {
-    // Since we can't load audio files, we'll use simple beep tones
-    // In a real game, you'd load actual audio files here
-    
-    // Create placeholder sound entries
-    // These will trigger Phaser's built-in beep sounds or we'll use Web Audio API
+    // Scene reference kept for future audio loading
+    scene;
   }
 
   /**

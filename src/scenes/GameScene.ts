@@ -104,7 +104,7 @@ export default class GameScene extends Phaser.Scene {
     }
   }
 
-  private onEnemyHitPlayer(playerObj: any, enemyObj: any): void {
+  private onEnemyHitPlayer(_playerObj: any, enemyObj: any): void {
     const enemy = enemyObj as Enemy;
 
     if (this.invulnerable || !enemy.active) return;
