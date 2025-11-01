@@ -1,14 +1,19 @@
 import Phaser from 'phaser';
 import { gameState } from '../state/GameState';
+import { SoundManager } from '../utils/SoundManager';
 
 export default class MenuScene extends Phaser.Scene {
+  private soundManager!: SoundManager;
+
   constructor() {
     super({ key: 'Menu' });
   }
 
   create(): void {
     const centerX = 480;
-    const centerY = 270;
+
+    // Get singleton sound manager instance
+    this.soundManager = SoundManager.getInstance();
 
     // Background
     this.cameras.main.setBackgroundColor('#e9f7ef');
@@ -114,6 +119,86 @@ export default class MenuScene extends Phaser.Scene {
         this.startGame();
       });
     }
+
+    // Sound toggle buttons in top-right corner
+    this.createSoundToggles();
+  }
+
+  private createSoundToggles(): void {
+    // Music toggle button
+    const musicButton = this.add.text(880, 30, '🎵', {
+      fontSize: '32px',
+      backgroundColor: '#228B22',
+      padding: { x: 12, y: 8 }
+    }).setOrigin(0.5).setInteractive();
+
+    const musicSlash = this.add.text(880, 30, '/', {
+      fontSize: '40px',
+      color: '#ff0000',
+      fontStyle: 'bold',
+      stroke: '#ffffff',
+      strokeThickness: 2
+    }).setOrigin(0.5).setVisible(!this.soundManager.isMusicEnabled());
+
+    musicButton.on('pointerover', () => {
+      musicButton.setScale(1.1);
+      musicButton.setBackgroundColor('#32CD32');
+    });
+
+    musicButton.on('pointerout', () => {
+      musicButton.setScale(1);
+      musicButton.setBackgroundColor('#228B22');
+    });
+
+    musicButton.on('pointerdown', () => {
+      this.soundManager.toggleMusic();
+      musicSlash.setVisible(!this.soundManager.isMusicEnabled());
+      this.soundManager.playHit(); // Feedback sound
+    });
+
+    // Sound effects toggle button
+    const sfxButton = this.add.text(930, 30, '🔊', {
+      fontSize: '32px',
+      backgroundColor: '#228B22',
+      padding: { x: 12, y: 8 }
+    }).setOrigin(0.5).setInteractive();
+
+    const sfxSlash = this.add.text(930, 30, '/', {
+      fontSize: '40px',
+      color: '#ff0000',
+      fontStyle: 'bold',
+      stroke: '#ffffff',
+      strokeThickness: 2
+    }).setOrigin(0.5).setVisible(!this.soundManager.isEnabled());
+
+    sfxButton.on('pointerover', () => {
+      sfxButton.setScale(1.1);
+      sfxButton.setBackgroundColor('#32CD32');
+    });
+
+    sfxButton.on('pointerout', () => {
+      sfxButton.setScale(1);
+      sfxButton.setBackgroundColor('#228B22');
+    });
+
+    sfxButton.on('pointerdown', () => {
+      this.soundManager.toggle();
+      sfxSlash.setVisible(!this.soundManager.isEnabled());
+      if (this.soundManager.isEnabled()) {
+        this.soundManager.playHit(); // Feedback sound when enabling
+      }
+    });
+
+    // Tooltip text
+    this.add.text(880, 60, 'Music', {
+      fontSize: '12px',
+      color: '#666666'
+    }).setOrigin(0.5);
+
+    this.add.text(930, 60, 'SFX', {
+      fontSize: '12px',
+      color: '#666666'
+    }).setOrigin(0.5);
   }
 
   private showHowToPlay(): void {

@@ -3,22 +3,43 @@ import Phaser from 'phaser';
 /**
  * Simple sound manager using Phaser's built-in audio
  * Creates procedurally generated sound effects and background music
+ * Singleton pattern for global access
  */
 export class SoundManager {
+  private static instance: SoundManager;
   private enabled: boolean = true;
   private musicEnabled: boolean = true;
   private audioContext?: AudioContext;
   private currentMusic?: { oscillators: OscillatorNode[]; gains: GainNode[] };
   private musicType: 'gameplay' | 'quiz' | null = null;
+  private lastMusicType: 'gameplay' | 'quiz' | null = null; // Track last music type for resume
 
-  constructor(scene: Phaser.Scene) {
+  constructor(scene?: Phaser.Scene) {
     // Scene reference kept for future audio loading
     scene;
+    
+    // Return existing instance if available
+    if (SoundManager.instance) {
+      return SoundManager.instance;
+    }
+    
     try {
       this.audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
     } catch (e) {
       console.warn('AudioContext creation failed:', e);
     }
+    
+    SoundManager.instance = this;
+  }
+
+  /**
+   * Get the singleton instance
+   */
+  static getInstance(): SoundManager {
+    if (!SoundManager.instance) {
+      SoundManager.instance = new SoundManager();
+    }
+    return SoundManager.instance;
   }
 
   /**
@@ -174,30 +195,24 @@ export class SoundManager {
     this.stopMusic();
     this.musicType = 'gameplay';
 
-    // High-energy original chiptune melody - 170 BPM
-    // Catchy, repetitive hook with driving rhythm
+    // Crazy Frog inspired Eurobeat melody - 142 BPM
+    // Transposed up for happy eurodance vibe
     const melody = [
-      784, 784, 784, 784, 698, 784, 880, 784,  // G G G G F G A G
-      698, 698, 784, 880, 988, 880, 784, 698,  // F F G A B A G F
-      784, 784, 784, 784, 698, 784, 880, 784,  // G G G G F G A G
-      698, 659, 698, 784, 659, 587, 523, 587,  // F E F G E D C D
-      784, 784, 784, 784, 698, 784, 880, 784,  // G G G G F G A G (repeat hook)
-      698, 698, 784, 880, 988, 880, 784, 698,  // F F G A B A G F
-      784, 659, 698, 784, 880, 988, 1047, 988, // G E F G A B C B (climax)
-      880, 784, 698, 659, 587, 523, 494, 523   // A G F E D C B C (descend)
+      880, 880, 880, 988, 880, 988, 1047, 988,  // A A A B A B C B
+      880, 988, 1174, 1047, 988, 880, 784, 880  // A B D C B A G A
     ];
     
-    // Pumping bassline with syncopation
+    // Pumping 4-on-the-floor bassline
     const bass = [
-      196, 196, 196, 196, 220, 220, 220, 220, // G G G G A A A A
-      196, 196, 196, 196, 175, 175, 196, 196, // G G G G F F G G
-      196, 196, 196, 196, 220, 220, 220, 220, // G G G G A A A A
-      196, 196, 196, 196, 175, 175, 196, 196  // G G G G F F G G
+      220, 220, 220, 247, 220, 220, 196, 220,  // A A A B A A G A
+      220, 247, 262, 247, 220, 196, 175, 196   // A B C B A G F G
     ];
     
-    const noteLength = 0.176; // 170 BPM eighth notes - super energetic!
+    const BPM = 142;
+    const beat = 60 / BPM;
+    const noteLength = beat * 0.25; // 16th notes for melody
     
-    this.playMusicLoop(melody, bass, noteLength, 0.09);
+    this.playEurobeatLoop(melody, bass, noteLength, beat, 0.12);
   }
 
   /**
@@ -234,6 +249,10 @@ export class SoundManager {
         }
       });
       this.currentMusic = { oscillators: [], gains: [] };
+    }
+    // Save the type before clearing it so we can resume later
+    if (this.musicType) {
+      this.lastMusicType = this.musicType;
     }
     this.musicType = null;
   }
@@ -303,12 +322,108 @@ export class SoundManager {
   }
 
   /**
+   * Play Eurobeat-style music loop with swing and detuning
+   */
+  private playEurobeatLoop(melody: number[], bass: number[], noteLength: number, beat: number, volume: number): void {
+    if (!this.audioContext) return;
+
+    const ctx = this.audioContext; // Store in const for type safety
+    const oscillators: OscillatorNode[] = [];
+    const gains: GainNode[] = [];
+    const startTime = ctx.currentTime + 0.1;
+
+    // Create gain nodes for melody and bass
+    const melodyGain = ctx.createGain();
+    const bassGain = ctx.createGain();
+    melodyGain.gain.value = volume;
+    bassGain.gain.value = volume * 1.8; // Pumping bass
+    melodyGain.connect(ctx.destination);
+    bassGain.connect(ctx.destination);
+    gains.push(melodyGain, bassGain);
+
+    // Play melody notes with swing and dual detuned oscillators for width
+    melody.forEach((freq, i) => {
+      const swing = (i % 2) ? beat * 0.03 : 0; // Swing every second note
+      const time = startTime + (i * noteLength) + swing;
+      const dur = noteLength * 0.9;
+
+      // Main oscillator
+      const osc1 = ctx.createOscillator();
+      const env1 = ctx.createGain();
+      osc1.type = 'square';
+      osc1.frequency.setValueAtTime(freq, time);
+      env1.gain.setValueAtTime(0, time);
+      env1.gain.linearRampToValueAtTime(1, time + 0.01);
+      env1.gain.exponentialRampToValueAtTime(0.001, time + dur);
+      osc1.connect(env1).connect(melodyGain);
+      osc1.start(time);
+      osc1.stop(time + dur);
+      oscillators.push(osc1);
+
+      // Detuned oscillator for chorus effect
+      const osc2 = ctx.createOscillator();
+      const env2 = ctx.createGain();
+      osc2.type = 'square';
+      osc2.frequency.setValueAtTime(freq * 1.01, time); // 1% detune
+      env2.gain.setValueAtTime(0, time);
+      env2.gain.linearRampToValueAtTime(0.7, time + 0.01);
+      env2.gain.exponentialRampToValueAtTime(0.001, time + dur);
+      osc2.connect(env2).connect(melodyGain);
+      osc2.start(time);
+      osc2.stop(time + dur);
+      oscillators.push(osc2);
+    });
+
+    // Play bass notes - 4-on-the-floor style
+    bass.forEach((freq, i) => {
+      const time = startTime + (i * beat * 0.5);
+      const dur = beat * 0.45;
+
+      const bassOsc = ctx.createOscillator();
+      const bassEnv = ctx.createGain();
+      bassOsc.type = 'sawtooth';
+      bassOsc.frequency.setValueAtTime(freq, time);
+      bassEnv.gain.setValueAtTime(0, time);
+      bassEnv.gain.linearRampToValueAtTime(1, time + 0.01);
+      bassEnv.gain.exponentialRampToValueAtTime(0.001, time + dur);
+      bassOsc.connect(bassEnv).connect(bassGain);
+      bassOsc.start(time);
+      bassOsc.stop(time + dur);
+      oscillators.push(bassOsc);
+    });
+
+    // Loop the music
+    const loopDuration = melody.length * noteLength + beat * 0.03; // Account for swing
+    const scheduleNextLoop = () => {
+      if (this.musicType && this.currentMusic) {
+        setTimeout(() => {
+          if (this.musicType === 'gameplay') {
+            this.startGameplayMusic();
+          } else if (this.musicType === 'quiz') {
+            this.startQuizMusic();
+          }
+        }, loopDuration * 1000);
+      }
+    };
+
+    this.currentMusic = { oscillators, gains };
+    scheduleNextLoop();
+  }
+
+  /**
    * Toggle music on/off
    */
   toggleMusic(): void {
     this.musicEnabled = !this.musicEnabled;
     if (!this.musicEnabled) {
       this.stopMusic();
+    } else {
+      // Resume the music that was last playing
+      if (this.lastMusicType === 'gameplay') {
+        this.startGameplayMusic();
+      } else if (this.lastMusicType === 'quiz') {
+        this.startQuizMusic();
+      }
     }
   }
 
@@ -320,5 +435,12 @@ export class SoundManager {
     if (!enabled) {
       this.stopMusic();
     }
+  }
+
+  /**
+   * Check if music is enabled
+   */
+  isMusicEnabled(): boolean {
+    return this.musicEnabled;
   }
 }

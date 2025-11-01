@@ -42,7 +42,7 @@ export default class GameScene extends Phaser.Scene {
     this.powerups = new Powerups(this, this.player);
     this.penalties = new Penalties(this, this.player, this.spawner);
     this.ui = new UI(this);
-    this.soundManager = new SoundManager(this);
+    this.soundManager = SoundManager.getInstance();
 
     // Setup collisions
     this.setupCollisions();
@@ -66,6 +66,75 @@ export default class GameScene extends Phaser.Scene {
         this.showPauseOverlay();
       });
     }
+
+    // Create always-visible sound toggle buttons
+    this.createSoundToggles();
+  }
+
+  private createSoundToggles(): void {
+    // Music toggle button (top-right corner, below wave text)
+    const musicButton = this.add.text(880, 80, '🎵', {
+      fontSize: '32px',
+      backgroundColor: '#228B22',
+      padding: { x: 12, y: 8 }
+    }).setOrigin(0.5).setInteractive().setScrollFactor(0).setDepth(1000);
+
+    const musicSlash = this.add.text(880, 80, '/', {
+      fontSize: '40px',
+      color: '#ff0000',
+      fontStyle: 'bold',
+      stroke: '#ffffff',
+      strokeThickness: 2
+    }).setOrigin(0.5).setVisible(!this.soundManager.isMusicEnabled()).setScrollFactor(0).setDepth(1001);
+
+    musicButton.on('pointerover', () => {
+      musicButton.setScale(1.1);
+      musicButton.setBackgroundColor('#32CD32');
+    });
+
+    musicButton.on('pointerout', () => {
+      musicButton.setScale(1);
+      musicButton.setBackgroundColor('#228B22');
+    });
+
+    musicButton.on('pointerdown', () => {
+      this.soundManager.toggleMusic();
+      musicSlash.setVisible(!this.soundManager.isMusicEnabled());
+      this.soundManager.playHit();
+    });
+
+    // Sound effects toggle button
+    const sfxButton = this.add.text(930, 80, '🔊', {
+      fontSize: '32px',
+      backgroundColor: '#228B22',
+      padding: { x: 12, y: 8 }
+    }).setOrigin(0.5).setInteractive().setScrollFactor(0).setDepth(1000);
+
+    const sfxSlash = this.add.text(930, 80, '/', {
+      fontSize: '40px',
+      color: '#ff0000',
+      fontStyle: 'bold',
+      stroke: '#ffffff',
+      strokeThickness: 2
+    }).setOrigin(0.5).setVisible(!this.soundManager.isEnabled()).setScrollFactor(0).setDepth(1001);
+
+    sfxButton.on('pointerover', () => {
+      sfxButton.setScale(1.1);
+      sfxButton.setBackgroundColor('#32CD32');
+    });
+
+    sfxButton.on('pointerout', () => {
+      sfxButton.setScale(1);
+      sfxButton.setBackgroundColor('#228B22');
+    });
+
+    sfxButton.on('pointerdown', () => {
+      this.soundManager.toggle();
+      sfxSlash.setVisible(!this.soundManager.isEnabled());
+      if (this.soundManager.isEnabled()) {
+        this.soundManager.playHit();
+      }
+    });
   }
 
   private setupCollisions(): void {
@@ -247,18 +316,32 @@ export default class GameScene extends Phaser.Scene {
   }
 
   private showPauseOverlay(): void {
-    const overlay = this.add.rectangle(480, 270, 960, 540, 0x000000, 0.7);
-    const text = this.add.text(480, 270, 'PAUSED\n\nPress P to resume', {
-      fontSize: '48px',
+    const overlay = this.add.rectangle(480, 270, 960, 540, 0x000000, 0.7).setDepth(500);
+    const text = this.add.text(480, 220, 'PAUSED', {
+      fontSize: '64px',
       color: '#ffffff',
       align: 'center',
       fontStyle: 'bold'
-    }).setOrigin(0.5);
+    }).setOrigin(0.5).setDepth(501);
+
+    const resumeText = this.add.text(480, 280, 'Press P to resume', {
+      fontSize: '24px',
+      color: '#ffffff',
+      align: 'center'
+    }).setOrigin(0.5).setDepth(501);
+
+    const controlsText = this.add.text(480, 340, 'Use sound icons in top-right to adjust audio', {
+      fontSize: '16px',
+      color: '#cccccc',
+      align: 'center'
+    }).setOrigin(0.5).setDepth(501);
 
     if (this.input.keyboard) {
       this.input.keyboard.once('keydown-P', () => {
         overlay.destroy();
         text.destroy();
+        resumeText.destroy();
+        controlsText.destroy();
         this.scene.resume();
       });
     }
