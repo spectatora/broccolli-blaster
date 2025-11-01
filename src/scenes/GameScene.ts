@@ -53,6 +53,9 @@ export default class GameScene extends Phaser.Scene {
     // Listen for smart bomb
     this.events.on('smart-bomb', this.onSmartBomb, this);
 
+    // Start background music
+    this.soundManager.startGameplayMusic();
+
     // Start first wave
     this.startWave();
 
@@ -184,11 +187,16 @@ export default class GameScene extends Phaser.Scene {
   private startQuiz(): void {
     this.scene.pause();
     this.scene.launch('Quiz', { wave: gameState.run?.wave });
+    // Switch to calm quiz music
+    this.soundManager.startQuizMusic();
   }
 
   private onQuizResolve(result: { correct: boolean; reward?: string; penalty?: string }): void {
     this.scene.stop('Quiz');
     this.scene.resume();
+
+    // Resume gameplay music
+    this.soundManager.startGameplayMusic();
 
     if (result.correct && result.reward) {
       this.powerups.apply(result.reward as any);
@@ -233,6 +241,8 @@ export default class GameScene extends Phaser.Scene {
 
   private gameOver(): void {
     gameState.endRun();
+    // Stop background music
+    this.soundManager.stopMusic();
     this.scene.start('Result');
   }
 
@@ -353,5 +363,10 @@ export default class GameScene extends Phaser.Scene {
         scoreText.destroy();
       }
     });
+  }
+
+  shutdown(): void {
+    // Stop music when scene shuts down
+    this.soundManager.stopMusic();
   }
 }
