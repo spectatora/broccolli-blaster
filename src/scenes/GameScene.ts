@@ -7,6 +7,7 @@ import { Spawner } from '../systems/Spawner';
 import { Powerups } from '../systems/Powerups';
 import { Penalties } from '../systems/Penalties';
 import { UI } from '../systems/UI';
+import { SoundManager } from '../utils/SoundManager';
 
 export default class GameScene extends Phaser.Scene {
   private player!: Player;
@@ -15,6 +16,7 @@ export default class GameScene extends Phaser.Scene {
   private powerups!: Powerups;
   private penalties!: Penalties;
   private ui!: UI;
+  private soundManager!: SoundManager;
   private waveInProgress: boolean = false;
   private invulnerable: boolean = false;
 
@@ -40,6 +42,7 @@ export default class GameScene extends Phaser.Scene {
     this.powerups = new Powerups(this, this.player);
     this.penalties = new Penalties(this, this.player, this.spawner);
     this.ui = new UI(this);
+    this.soundManager = new SoundManager(this);
 
     // Setup collisions
     this.setupCollisions();
@@ -90,9 +93,14 @@ export default class GameScene extends Phaser.Scene {
     bullet.setActive(false);
     bullet.setVisible(false);
 
+    // Play hit sound
+    this.soundManager.playHit();
+
     const killed = enemy.takeDamage(1);
     if (killed) {
       gameState.addScore(enemy.scoreValue);
+      // Play explosion sound
+      this.soundManager.playExplosion();
     }
   }
 
@@ -103,10 +111,14 @@ export default class GameScene extends Phaser.Scene {
 
     if (this.player.hasShield) {
       this.player.deactivateShield();
+      this.soundManager.playHit();
       enemy.takeDamage(999);
     } else {
       const isDead = gameState.takeDamage(1);
       this.player.flashDamage();
+      
+      // Play damage sound
+      this.soundManager.playDamage();
       
       if (isDead) {
         this.gameOver();
@@ -172,9 +184,13 @@ export default class GameScene extends Phaser.Scene {
     if (result.correct && result.reward) {
       this.powerups.apply(result.reward as any);
       this.ui.showPowerup(result.reward as any);
+      // Play correct answer sound
+      this.soundManager.playCorrect();
     } else if (!result.correct && result.penalty) {
       this.penalties.apply(result.penalty as any);
       this.ui.showPenalty(result.penalty);
+      // Play wrong answer sound
+      this.soundManager.playWrong();
     }
 
     // Next wave
@@ -186,6 +202,9 @@ export default class GameScene extends Phaser.Scene {
   }
 
   private onSmartBomb(): void {
+    // Play bomb sound
+    this.soundManager.playBomb();
+    
     const enemies = this.spawner.getAllEnemies();
     enemies.forEach(enemy => {
       if (enemy.enemyType === 'fries' || enemy.enemyType === 'soda') {
@@ -238,6 +257,9 @@ export default class GameScene extends Phaser.Scene {
   }
 
   private fireBullets(): void {
+    // Play shoot sound
+    this.soundManager.playShoot();
+    
     if (this.player.spreadActive) {
       // Fire 3 bullets in spread pattern
       this.fireBullet(-10);
