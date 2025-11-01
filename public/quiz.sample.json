@@ -1,0 +1,186 @@
+{
+  "id": "health-basics",
+  "title": "Health & Food Trivia",
+  "questions": [
+    {
+      "id": "q1",
+      "prompt": "Which veggie superhero has the most vitamin C?",
+      "choices": [
+        {"id": "a", "text": "🥦 Broccoli the Brave", "isCorrect": true},
+        {"id": "b", "text": "🥤 Soda the Sneaky", "isCorrect": false},
+        {"id": "c", "text": "🍬 Candy the Chaos", "isCorrect": false}
+      ],
+      "explanation": "Broccoli is packed with vitamin C! Soda just makes you crash.",
+      "reward": "shield",
+      "penalty": "spawn"
+    },
+    {
+      "id": "q2",
+      "prompt": "What happens when you eat too much junk food?",
+      "choices": [
+        {"id": "a", "text": "You gain superpowers! 💪", "isCorrect": false},
+        {"id": "b", "text": "You feel sluggish and tired 😴", "isCorrect": true},
+        {"id": "c", "text": "You become invisible 👻", "isCorrect": false}
+      ],
+      "explanation": "Junk food = energy crash! Veggies = sustained energy!",
+      "reward": "rapid",
+      "penalty": "heat"
+    },
+    {
+      "id": "q3",
+      "prompt": "Which of these is NOT a vegetable's superpower?",
+      "choices": [
+        {"id": "a", "text": "Fighting diseases 🦠", "isCorrect": false},
+        {"id": "b", "text": "Making you glow ✨", "isCorrect": false},
+        {"id": "c", "text": "Teaching you to fly 🚀", "isCorrect": true}
+      ],
+      "explanation": "Veggies do amazing things, but flying lessons? That's sci-fi!",
+      "reward": "spread",
+      "penalty": "chip"
+    },
+    {
+      "id": "q4",
+      "prompt": "How many servings of vegetables should you eat daily?",
+      "choices": [
+        {"id": "a", "text": "Zero (veggies are optional)", "isCorrect": false},
+        {"id": "b", "text": "3-5 servings 🥗", "isCorrect": true},
+        {"id": "c", "text": "Only on Sundays", "isCorrect": false}
+      ],
+      "explanation": "Your body needs 3-5 veggie servings every day to thrive!",
+      "reward": "rapid",
+      "penalty": "spawn"
+    },
+    {
+      "id": "q5",
+      "prompt": "What makes french fries unhealthy?",
+      "choices": [
+        {"id": "a", "text": "They're deep fried in oil 🍟", "isCorrect": true},
+        {"id": "b", "text": "They're made from potatoes", "isCorrect": false},
+        {"id": "c", "text": "They taste too good", "isCorrect": false}
+      ],
+      "explanation": "It's the deep frying in oil and excess salt that's the villain!",
+      "reward": "bomb",
+      "penalty": "heat"
+    },
+    {
+      "id": "q6",
+      "prompt": "Which drink is the healthiest choice?",
+      "choices": [
+        {"id": "a", "text": "💧 Water", "isCorrect": true},
+        {"id": "b", "text": "🥤 Soda", "isCorrect": false},
+        {"id": "c", "text": "🍹 Energy drink", "isCorrect": false}
+      ],
+      "explanation": "Water is the ultimate hydration hero! No sugar, no calories!",
+      "reward": "shield",
+      "penalty": "chip"
+    },
+    {
+      "id": "q7",
+      "prompt": "Why is fiber important in your diet?",
+      "choices": [
+        {"id": "a", "text": "It makes you run faster 🏃", "isCorrect": false},
+        {"id": "b", "text": "It helps digestion 🌾", "isCorrect": true},
+        {"id": "c", "text": "It changes your hair color", "isCorrect": false}
+      ],
+      "explanation": "Fiber keeps your digestive system happy and healthy!",
+      "reward": "spread",
+      "penalty": "spawn"
+    },
+    {
+      "id": "q8",
+      "prompt": "What's the problem with eating too much sugar?",
+      "choices": [
+        {"id": "a", "text": "Tooth decay & energy crashes 🦷", "isCorrect": true},
+        {"id": "b", "text": "You become too sweet", "isCorrect": false},
+        {"id": "c", "text": "Nothing, sugar is life!", "isCorrect": false}
+      ],
+      "explanation": "Sugar causes cavities, weight gain, and energy rollercoasters!",
+      "reward": "rapid",
+      "penalty": "chip"
+    },
+    {
+      "id": "q9",
+      "prompt": "Which food gives you the most lasting energy?",
+      "choices": [
+        {"id": "a", "text": "🍭 Candy bar", "isCorrect": false},
+        {"id": "b", "text": "🥜 Nuts and seeds", "isCorrect": true},
+        {"id": "c", "text": "🍪 Cookies", "isCorrect": false}
+      ],
+      "explanation": "Nuts provide protein and healthy fats for sustained energy!",
+      "reward": "shield",
+      "penalty": "heat"
+    },
+    {
+      "id": "q10",
+      "prompt": "What makes burgers 'junk food'?",
+      "choices": [
+        {"id": "a", "text": "High fat, salt & processed meat 🍔", "isCorrect": true},
+        {"id": "b", "text": "They're round", "isCorrect": false},
+        {"id": "c", "text": "They have buns", "isCorrect": false}
+      ],
+      "explanation": "Fast food burgers are loaded with unhealthy fats and sodium!",
+      "reward": "bomb",
+      "penalty": "spawn"
+    },
+    {
+      "id": "q11",
+      "prompt": "What's a balanced meal?",
+      "choices": [
+        {"id": "a", "text": "Pizza + soda + ice cream", "isCorrect": false},
+        {"id": "b", "text": "Veggies + protein + whole grains 🍽️", "isCorrect": true},
+        {"id": "c", "text": "Three candy bars", "isCorrect": false}
+      ],
+      "explanation": "Balance means variety: vegetables, protein, and healthy carbs!",
+      "reward": "spread",
+      "penalty": "chip"
+    },
+    {
+      "id": "q12",
+      "prompt": "Why should you limit processed foods?",
+      "choices": [
+        {"id": "a", "text": "They lack nutrients & have additives 📦", "isCorrect": true},
+        {"id": "b", "text": "They're too colorful", "isCorrect": false},
+        {"id": "c", "text": "They make weird sounds", "isCorrect": false}
+      ],
+      "explanation": "Processed foods are stripped of nutrients and full of chemicals!",
+      "reward": "rapid",
+      "penalty": "heat"
+    },
+    {
+      "id": "q13",
+      "prompt": "What's the best snack for a study session?",
+      "choices": [
+        {"id": "a", "text": "🍎 Apple with peanut butter", "isCorrect": true},
+        {"id": "b", "text": "🍩 Donuts", "isCorrect": false},
+        {"id": "c", "text": "🍫 Chocolate bars", "isCorrect": false}
+      ],
+      "explanation": "Apples + peanut butter = brain fuel without the crash!",
+      "reward": "shield",
+      "penalty": "spawn"
+    },
+    {
+      "id": "q14",
+      "prompt": "What does calcium do for your body?",
+      "choices": [
+        {"id": "a", "text": "Makes you glow in the dark", "isCorrect": false},
+        {"id": "b", "text": "Strengthens bones & teeth 🦴", "isCorrect": true},
+        {"id": "c", "text": "Helps you read minds", "isCorrect": false}
+      ],
+      "explanation": "Calcium keeps your skeleton strong and your teeth healthy!",
+      "reward": "bomb",
+      "penalty": "chip"
+    },
+    {
+      "id": "q15",
+      "prompt": "What's the trick to reading food labels?",
+      "choices": [
+        {"id": "a", "text": "Check sugar, salt & ingredient list 🏷️", "isCorrect": true},
+        {"id": "b", "text": "Pick the prettiest package", "isCorrect": false},
+        {"id": "c", "text": "Close your eyes and guess", "isCorrect": false}
+      ],
+      "explanation": "Always check nutrition facts! Less sugar and salt = better choice!",
+      "reward": "spread",
+      "penalty": "heat"
+    }
+  ]
+}
