@@ -101,6 +101,8 @@ export default class GameScene extends Phaser.Scene {
       gameState.addScore(enemy.scoreValue);
       // Play explosion sound
       this.soundManager.playExplosion();
+      // Screen shake on enemy death
+      this.cameras.main.shake(100, 0.002);
     }
   }
 
@@ -119,6 +121,9 @@ export default class GameScene extends Phaser.Scene {
       
       // Play damage sound
       this.soundManager.playDamage();
+      
+      // Screen shake on damage
+      this.cameras.main.shake(150, 0.005);
       
       if (isDead) {
         this.gameOver();
@@ -204,6 +209,9 @@ export default class GameScene extends Phaser.Scene {
   private onSmartBomb(): void {
     // Play bomb sound
     this.soundManager.playBomb();
+    
+    // Massive screen shake for bomb
+    this.cameras.main.shake(300, 0.01);
     
     const enemies = this.spawner.getAllEnemies();
     enemies.forEach(enemy => {

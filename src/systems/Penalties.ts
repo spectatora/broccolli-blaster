@@ -62,8 +62,8 @@ export class Penalties {
       gameState.takeDamage(1);
       this.player.flashDamage();
       
-      // Screen shake
-      this.scene.cameras.main.shake(150, 0.002);
+      // Screen shake on HP chip
+      this.scene.cameras.main.shake(200, 0.006);
     }
   }
 }

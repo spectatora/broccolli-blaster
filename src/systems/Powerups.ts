@@ -14,6 +14,9 @@ export class Powerups {
   }
 
   apply(type: PowerUpType): void {
+    // Screen shake for power-up activation
+    this.scene.cameras.main.shake(100, 0.003);
+    
     switch (type) {
       case 'spread':
         this.activateSpread();
