@@ -9,14 +9,15 @@ export class Bullet extends Phaser.Physics.Arcade.Sprite {
     scene.physics.add.existing(this);
   }
 
-  fire(x: number, y: number, angle: number = -90): void {
+  fire(x: number, y: number, angle: number = -90, speed?: number): void {
     this.setPosition(x, y);
     this.setActive(true);
     this.setVisible(true);
     
+    const bulletSpeed = speed ?? this.speed;
     const body = this.body as Phaser.Physics.Arcade.Body;
     const rad = Phaser.Math.DegToRad(angle);
-    body.setVelocity(Math.cos(rad) * this.speed, Math.sin(rad) * this.speed);
+    body.setVelocity(Math.cos(rad) * bulletSpeed, Math.sin(rad) * bulletSpeed);
   }
 
   preUpdate(time: number, delta: number): void {

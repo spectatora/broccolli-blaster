@@ -35,6 +35,13 @@ export type Best = {
   bestWave: number;
 };
 
+export type WeaponType = "pea-shooter" | "laser" | "shotgun" | "missiles";
+
+export type Progression = {
+  unlockedWeapons: WeaponType[];
+  currentWeapon: WeaponType;
+};
+
 export type EnemyType = "fries" | "soda" | "burger";
 
 export type PowerUpType = "spread" | "rapid" | "shield" | "bomb";

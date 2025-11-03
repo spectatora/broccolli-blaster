@@ -1,6 +1,8 @@
 import Phaser from 'phaser';
 import { gameState } from '../state/GameState';
 import { SoundManager } from '../utils/SoundManager';
+import { WEAPON_CONFIGS } from '../systems/WeaponSystem';
+import type { WeaponType } from '../types';
 
 export default class MenuScene extends Phaser.Scene {
   private soundManager!: SoundManager;
@@ -91,26 +93,29 @@ export default class MenuScene extends Phaser.Scene {
     });
 
     // Best scores
-    this.add.text(centerX, 410, 'BEST RECORDS', {
-      fontSize: '20px',
+    this.add.text(centerX, 390, 'BEST RECORDS', {
+      fontSize: '18px',
       color: '#228B22',
       fontStyle: 'bold'
     }).setOrigin(0.5);
 
-    this.add.text(centerX - 100, 450, `High Score: ${gameState.best.bestScore}`, {
-      fontSize: '18px',
+    this.add.text(centerX - 100, 418, `High Score: ${gameState.best.bestScore}`, {
+      fontSize: '16px',
       color: '#666666'
     }).setOrigin(0.5);
 
-    this.add.text(centerX + 100, 450, `Best Wave: ${gameState.best.bestWave}`, {
-      fontSize: '18px',
+    this.add.text(centerX + 100, 418, `Best Wave: ${gameState.best.bestWave}`, {
+      fontSize: '16px',
       color: '#666666'
     }).setOrigin(0.5);
 
-    // Controls
-    this.add.text(centerX, 500, 'WASD/Arrows: Move  |  SPACE: Shoot  |  P: Pause', {
-      fontSize: '14px',
-      color: '#999999'
+    // Unlocked weapons display
+    this.showUnlockedWeapons();
+
+    // Controls - positioned at very bottom
+    this.add.text(centerX, 525, 'WASD/Arrows: Move  |  SPACE: Shoot  |  P: Pause  |  1-4: Switch Weapon', {
+      fontSize: '11px',
+      color: '#888888'
     }).setOrigin(0.5);
 
     // Space to start
@@ -122,6 +127,64 @@ export default class MenuScene extends Phaser.Scene {
 
     // Sound toggle buttons in top-right corner
     this.createSoundToggles();
+  }
+
+  private showUnlockedWeapons(): void {
+    const centerX = 480;
+    const startY = 490;
+    const boxWidth = 130;
+    const boxHeight = 45;
+    const spacing = 145;
+
+    // Title for weapons section with more padding
+    this.add.text(centerX, 455, 'WEAPONS', {
+      fontSize: '16px',
+      color: '#228B22',
+      fontStyle: 'bold'
+    }).setOrigin(0.5);
+
+    const allWeapons: WeaponType[] = ['pea-shooter', 'laser', 'shotgun', 'missiles'];
+    
+    allWeapons.forEach((weapon, index) => {
+      const config = WEAPON_CONFIGS[weapon];
+      const isUnlocked = gameState.isWeaponUnlocked(weapon);
+      // Center the weapons horizontally - start from leftmost position
+      const totalWidth = (allWeapons.length - 1) * spacing;
+      const startX = centerX - (totalWidth / 2);
+      const x = startX + (index * spacing);
+      
+      // Weapon box with rounded corners effect
+      const box = this.add.rectangle(x, startY, boxWidth, boxHeight, isUnlocked ? 0x228B22 : 0x555555, 0.3);
+      box.setStrokeStyle(2, isUnlocked ? 0x32CD32 : 0x888888);
+      
+      // Weapon number and name on separate lines for better readability
+      this.add.text(x, startY - 10, `[${index + 1}]`, {
+        fontSize: '12px',
+        color: isUnlocked ? '#FFFF00' : '#999999',
+        fontStyle: 'bold'
+      }).setOrigin(0.5);
+      
+      this.add.text(x, startY + 5, config.name, {
+        fontSize: '10px',
+        color: isUnlocked ? '#ffffff' : '#aaaaaa',
+        fontStyle: 'bold',
+        wordWrap: { width: boxWidth - 10 },
+        align: 'center'
+      }).setOrigin(0.5);
+      
+      // Unlock requirement or status - smaller and at bottom
+      if (isUnlocked) {
+        this.add.text(x, startY + 18, '✓', {
+          fontSize: '14px',
+          color: '#00ff00'
+        }).setOrigin(0.5);
+      } else {
+        this.add.text(x, startY + 18, `Unlock: Wave ${config.unlockWave}`, {
+          fontSize: '8px',
+          color: '#ffaa00'
+        }).setOrigin(0.5);
+      }
+    });
   }
 
   private createSoundToggles(): void {

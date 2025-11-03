@@ -7,7 +7,9 @@ import { Spawner } from '../systems/Spawner';
 import { Powerups } from '../systems/Powerups';
 import { Penalties } from '../systems/Penalties';
 import { UI } from '../systems/UI';
+import { WeaponSystem, WEAPON_CONFIGS } from '../systems/WeaponSystem';
 import { SoundManager } from '../utils/SoundManager';
+import type { WeaponType } from '../types';
 
 export default class GameScene extends Phaser.Scene {
   private player!: Player;
@@ -16,6 +18,7 @@ export default class GameScene extends Phaser.Scene {
   private powerups!: Powerups;
   private penalties!: Penalties;
   private ui!: UI;
+  private weaponSystem!: WeaponSystem;
   private soundManager!: SoundManager;
   private waveInProgress: boolean = false;
   private invulnerable: boolean = false;
@@ -41,8 +44,12 @@ export default class GameScene extends Phaser.Scene {
     this.spawner = new Spawner(this);
     this.powerups = new Powerups(this, this.player);
     this.penalties = new Penalties(this, this.player, this.spawner);
+    this.weaponSystem = new WeaponSystem(this, this.bullets);
     this.ui = new UI(this);
     this.soundManager = SoundManager.getInstance();
+
+    // Set current weapon
+    this.weaponSystem.setWeapon(gameState.getCurrentWeapon());
 
     // Setup collisions
     this.setupCollisions();
@@ -65,10 +72,41 @@ export default class GameScene extends Phaser.Scene {
         this.scene.pause();
         this.scene.launch('Pause');
       });
+
+      // Weapon switching keys
+      this.input.keyboard.on('keydown-ONE', () => this.switchWeapon('pea-shooter'));
+      this.input.keyboard.on('keydown-TWO', () => this.switchWeapon('laser'));
+      this.input.keyboard.on('keydown-THREE', () => this.switchWeapon('shotgun'));
+      this.input.keyboard.on('keydown-FOUR', () => this.switchWeapon('missiles'));
     }
 
     // Create always-visible sound toggle buttons
     this.createSoundToggles();
+  }
+
+  private switchWeapon(weapon: WeaponType): void {
+    if (gameState.isWeaponUnlocked(weapon)) {
+      gameState.setCurrentWeapon(weapon);
+      this.weaponSystem.setWeapon(weapon);
+      this.soundManager.playHit();
+      
+      // Show weapon switch notification
+      const config = WEAPON_CONFIGS[weapon];
+      const text = this.add.text(480, 500, `Switched to ${config.name}`, {
+        fontSize: '20px',
+        color: '#ffffff',
+        backgroundColor: '#000000',
+        padding: { x: 10, y: 5 }
+      }).setOrigin(0.5).setDepth(1000);
+
+      this.tweens.add({
+        targets: text,
+        alpha: 0,
+        y: 480,
+        duration: 1000,
+        onComplete: () => text.destroy()
+      });
+    }
   }
 
   private createSoundToggles(): void {
@@ -245,12 +283,60 @@ export default class GameScene extends Phaser.Scene {
     // Add wave bonus
     gameState.addScore(100);
     
+    // Check for weapon unlocks
+    this.checkWeaponUnlocks();
+    
     this.ui.showWaveComplete();
 
     // Start quiz after delay
     this.time.delayedCall(1000, () => {
       this.startQuiz();
     });
+  }
+
+  private checkWeaponUnlocks(): void {
+    if (!gameState.run) return;
+
+    const wave = gameState.run.wave;
+    const weaponsToCheck: Array<{ weapon: WeaponType; wave: number }> = [
+      { weapon: 'laser', wave: 3 },
+      { weapon: 'shotgun', wave: 5 },
+      { weapon: 'missiles', wave: 8 }
+    ];
+
+    weaponsToCheck.forEach(({ weapon, wave: unlockWave }) => {
+      if (wave === unlockWave && gameState.unlockWeapon(weapon)) {
+        this.showWeaponUnlock(weapon);
+      }
+    });
+  }
+
+  private showWeaponUnlock(weapon: WeaponType): void {
+    const config = WEAPON_CONFIGS[weapon];
+    const text = this.add.text(480, 270, `NEW WEAPON UNLOCKED!\n${config.name}\n${config.description}\n\nPress [1-4] to switch weapons`, {
+      fontSize: '32px',
+      fontFamily: 'Arial',
+      color: '#FFD700',
+      stroke: '#000000',
+      strokeThickness: 6,
+      fontStyle: 'bold',
+      align: 'center'
+    }).setOrigin(0.5).setDepth(1000);
+
+    // Flash effect
+    this.tweens.add({
+      targets: text,
+      scale: { from: 0.8, to: 1.2 },
+      alpha: { from: 1, to: 0 },
+      duration: 3000,
+      ease: 'Cubic.easeOut',
+      onComplete: () => {
+        text.destroy();
+      }
+    });
+
+    // Play unlock sound
+    this.soundManager.playCorrect();
   }
 
   private startQuiz(): void {
@@ -330,29 +416,17 @@ export default class GameScene extends Phaser.Scene {
       }
     }
 
+    // Update fire cooldown based on weapon and power-ups
+    const weaponCooldown = this.weaponSystem.getCooldown();
+    const adjustedCooldown = this.player.rapidActive ? weaponCooldown * 0.625 : weaponCooldown;
+    this.player.setFireCooldown(adjustedCooldown);
+
     // Update UI
     this.ui.update();
   }
 
   private fireBullets(): void {
-    // Play shoot sound
-    this.soundManager.playShoot();
-    
-    if (this.player.spreadActive) {
-      // Fire 3 bullets in spread pattern
-      this.fireBullet(-10);
-      this.fireBullet(0);
-      this.fireBullet(10);
-    } else {
-      this.fireBullet(0);
-    }
-  }
-
-  private fireBullet(angleOffset: number): void {
-    const bullet = this.bullets.get(this.player.x, this.player.y) as Bullet;
-    if (bullet) {
-      bullet.fire(this.player.x, this.player.y - 20, -90 + angleOffset);
-    }
+    this.weaponSystem.fire(this.player.x, this.player.y, this.player.spreadActive);
   }
 
   private createExplosion(x: number, y: number, enemyType: string): void {

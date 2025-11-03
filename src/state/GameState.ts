@@ -1,11 +1,51 @@
-import type { RunStats, Best, QuizPack, Question } from '../types';
+import type { RunStats, Best, QuizPack, Question, Progression, WeaponType } from '../types';
 import { loadBest, saveBest } from './Persist';
 
 export class GameState {
   run: RunStats | null = null;
   best: Best = loadBest() ?? { bestScore: 0, bestWave: 0 };
+  progression: Progression = this.loadProgression();
   quizPack: QuizPack | null = null;
   usedQuestions: Set<string> = new Set();
+
+  private loadProgression(): Progression {
+    const saved = localStorage.getItem('bb.progression');
+    if (saved) {
+      return JSON.parse(saved);
+    }
+    return {
+      unlockedWeapons: ['pea-shooter'],
+      currentWeapon: 'pea-shooter'
+    };
+  }
+
+  private saveProgression(): void {
+    localStorage.setItem('bb.progression', JSON.stringify(this.progression));
+  }
+
+  unlockWeapon(weapon: WeaponType): boolean {
+    if (!this.progression.unlockedWeapons.includes(weapon)) {
+      this.progression.unlockedWeapons.push(weapon);
+      this.saveProgression();
+      return true;
+    }
+    return false;
+  }
+
+  setCurrentWeapon(weapon: WeaponType): void {
+    if (this.progression.unlockedWeapons.includes(weapon)) {
+      this.progression.currentWeapon = weapon;
+      this.saveProgression();
+    }
+  }
+
+  getCurrentWeapon(): WeaponType {
+    return this.progression.currentWeapon;
+  }
+
+  isWeaponUnlocked(weapon: WeaponType): boolean {
+    return this.progression.unlockedWeapons.includes(weapon);
+  }
 
   startRun(): void {
     this.run = {

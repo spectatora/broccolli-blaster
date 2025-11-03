@@ -1,11 +1,13 @@
 import Phaser from 'phaser';
 import { gameState } from '../state/GameState';
+import { WEAPON_CONFIGS } from './WeaponSystem';
 import type { PowerUpType } from '../types';
 
 export class UI {
   private scene: Phaser.Scene;
   private scoreText?: Phaser.GameObjects.Text;
   private waveText?: Phaser.GameObjects.Text;
+  private weaponText?: Phaser.GameObjects.Text;
   private hpIcons: Phaser.GameObjects.Text[] = [];
   private powerupTexts: Map<PowerUpType, Phaser.GameObjects.Text> = new Map();
 
@@ -40,6 +42,15 @@ export class UI {
       });
       this.hpIcons.push(heart);
     }
+
+    // Weapon indicator - bottom center
+    this.weaponText = this.scene.add.text(480, 520, '', {
+      fontSize: '16px',
+      color: '#ffffff',
+      backgroundColor: '#000000',
+      padding: { x: 8, y: 4 },
+      fontStyle: 'bold'
+    }).setOrigin(0.5).setScrollFactor(0).setDepth(100);
   }
 
   update(): void {
@@ -53,6 +64,14 @@ export class UI {
     // Update wave
     if (this.waveText) {
       this.waveText.setText(`Wave: ${gameState.run.wave}`);
+    }
+
+    // Update weapon display
+    if (this.weaponText) {
+      const currentWeapon = gameState.getCurrentWeapon();
+      const config = WEAPON_CONFIGS[currentWeapon];
+      const weaponNumber = ['pea-shooter', 'laser', 'shotgun', 'missiles'].indexOf(currentWeapon) + 1;
+      this.weaponText.setText(`[${weaponNumber}] ${config.name}`);
     }
 
     // Update HP
@@ -145,6 +164,7 @@ export class UI {
     this.hpIcons.forEach(icon => icon.destroy());
     this.scoreText?.destroy();
     this.waveText?.destroy();
+    this.weaponText?.destroy();
     this.powerupTexts.forEach(text => text.destroy());
   }
 }
