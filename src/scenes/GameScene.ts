@@ -63,7 +63,7 @@ export default class GameScene extends Phaser.Scene {
     if (this.input.keyboard) {
       this.input.keyboard.on('keydown-P', () => {
         this.scene.pause();
-        this.showPauseOverlay();
+        this.scene.launch('Pause');
       });
     }
 
@@ -313,38 +313,6 @@ export default class GameScene extends Phaser.Scene {
     // Stop background music
     this.soundManager.stopMusic();
     this.scene.start('Result');
-  }
-
-  private showPauseOverlay(): void {
-    const overlay = this.add.rectangle(480, 270, 960, 540, 0x000000, 0.7).setDepth(500);
-    const text = this.add.text(480, 220, 'PAUSED', {
-      fontSize: '64px',
-      color: '#ffffff',
-      align: 'center',
-      fontStyle: 'bold'
-    }).setOrigin(0.5).setDepth(501);
-
-    const resumeText = this.add.text(480, 280, 'Press P to resume', {
-      fontSize: '24px',
-      color: '#ffffff',
-      align: 'center'
-    }).setOrigin(0.5).setDepth(501);
-
-    const controlsText = this.add.text(480, 340, 'Use sound icons in top-right to adjust audio', {
-      fontSize: '16px',
-      color: '#cccccc',
-      align: 'center'
-    }).setOrigin(0.5).setDepth(501);
-
-    if (this.input.keyboard) {
-      this.input.keyboard.once('keydown-P', () => {
-        overlay.destroy();
-        text.destroy();
-        resumeText.destroy();
-        controlsText.destroy();
-        this.scene.resume();
-      });
-    }
   }
 
   update(time: number): void {

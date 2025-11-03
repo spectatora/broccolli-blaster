@@ -3,6 +3,7 @@ import BootScene from './scenes/BootScene';
 import MenuScene from './scenes/MenuScene';
 import GameScene from './scenes/GameScene';
 import QuizScene from './scenes/QuizScene';
+import PauseScene from './scenes/PauseScene';
 import ResultScene from './scenes/ResultScene';
 
 const config: Phaser.Types.Core.GameConfig = {
@@ -18,7 +19,7 @@ const config: Phaser.Types.Core.GameConfig = {
       gravity: { x: 0, y: 0 }
     }
   },
-  scene: [BootScene, MenuScene, GameScene, QuizScene, ResultScene]
+  scene: [BootScene, MenuScene, GameScene, QuizScene, PauseScene, ResultScene]
 };
 
 new Phaser.Game(config);
