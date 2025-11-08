@@ -26,10 +26,16 @@ export class Spawner {
     const waveScale = 2;
     const totalEnemies = Math.min(baseCount + waveNumber * waveScale, 40);
     
-    // Distribution based on wave
-    const friesCount = Math.floor(totalEnemies * 0.5);
-    const sodaCount = Math.floor(totalEnemies * 0.3);
-    const burgerCount = Math.floor(totalEnemies * 0.2);
+    // Distribution based on wave - ensure at least 1 of each type
+    let friesCount = Math.max(1, Math.floor(totalEnemies * 0.5));
+    let sodaCount = Math.max(1, Math.floor(totalEnemies * 0.3));
+    let burgerCount = Math.max(1, Math.floor(totalEnemies * 0.2));
+
+    // Adjust for rounding to match total
+    const actualTotal = friesCount + sodaCount + burgerCount;
+    if (actualTotal < totalEnemies) {
+      friesCount += (totalEnemies - actualTotal); // Add remainder to fries
+    }
 
     // Spawn in formations
     this.spawnFormation('fries', friesCount, waveNumber, 'rows');
