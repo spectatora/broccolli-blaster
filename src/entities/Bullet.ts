@@ -10,6 +10,11 @@ export class Bullet extends Phaser.Physics.Arcade.Sprite {
   }
 
   fire(x: number, y: number, angle: number = -90, speed?: number): void {
+    if (typeof angle !== 'number' || isNaN(angle)) {
+      console.warn('Invalid bullet angle:', angle);
+      angle = -90; // Default to straight up
+    }
+    
     this.setPosition(x, y);
     this.setActive(true);
     this.setVisible(true);
