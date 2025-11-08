@@ -104,9 +104,11 @@ export default class QuizScene extends Phaser.Scene {
       for (let i = 0; i < this.currentQuestion.choices.length; i++) {
         const key = String.fromCharCode(49 + i); // '1', '2', '3', etc.
         this.input.keyboard.on(`keydown-${key}`, () => {
-          const choice = this.currentQuestion?.choices[i];
-          if (choice) {
-            this.selectChoice(choice.id);
+          if (this.currentQuestion && i < this.currentQuestion.choices.length) {
+            const choice = this.currentQuestion.choices[i];
+            if (choice) {
+              this.selectChoice(choice.id);
+            }
           }
         });
       }
