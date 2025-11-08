@@ -22,6 +22,12 @@ export default class GameScene extends Phaser.Scene {
   private soundManager!: SoundManager;
   private waveInProgress: boolean = false;
   private invulnerable: boolean = false;
+  private weaponKeys?: {
+    one: () => void;
+    two: () => void;
+    three: () => void;
+    four: () => void;
+  };
 
   constructor() {
     super({ key: 'Game' });
@@ -73,19 +79,18 @@ export default class GameScene extends Phaser.Scene {
         this.scene.launch('Pause');
       });
 
-      // Weapon switching keys
-      this.input.keyboard.on('keydown-ONE', () => {
-        if (!this.scene.isPaused()) this.switchWeapon('pea-shooter');
-      });
-      this.input.keyboard.on('keydown-TWO', () => {
-        if (!this.scene.isPaused()) this.switchWeapon('laser');
-      });
-      this.input.keyboard.on('keydown-THREE', () => {
-        if (!this.scene.isPaused()) this.switchWeapon('shotgun');
-      });
-      this.input.keyboard.on('keydown-FOUR', () => {
-        if (!this.scene.isPaused()) this.switchWeapon('missiles');
-      });
+      // Weapon switching keys - store handlers for cleanup
+      this.weaponKeys = {
+        one: () => { if (!this.scene.isPaused()) this.switchWeapon('pea-shooter'); },
+        two: () => { if (!this.scene.isPaused()) this.switchWeapon('laser'); },
+        three: () => { if (!this.scene.isPaused()) this.switchWeapon('shotgun'); },
+        four: () => { if (!this.scene.isPaused()) this.switchWeapon('missiles'); }
+      };
+      
+      this.input.keyboard.on('keydown-ONE', this.weaponKeys.one);
+      this.input.keyboard.on('keydown-TWO', this.weaponKeys.two);
+      this.input.keyboard.on('keydown-THREE', this.weaponKeys.three);
+      this.input.keyboard.on('keydown-FOUR', this.weaponKeys.four);
     }
 
     // Create always-visible sound toggle buttons
@@ -501,5 +506,13 @@ export default class GameScene extends Phaser.Scene {
   shutdown(): void {
     // Stop music when scene shuts down
     this.soundManager.stopMusic();
+    
+    // Clean up keyboard listeners
+    if (this.input.keyboard && this.weaponKeys) {
+      this.input.keyboard.off('keydown-ONE', this.weaponKeys.one);
+      this.input.keyboard.off('keydown-TWO', this.weaponKeys.two);
+      this.input.keyboard.off('keydown-THREE', this.weaponKeys.three);
+      this.input.keyboard.off('keydown-FOUR', this.weaponKeys.four);
+    }
   }
 }
