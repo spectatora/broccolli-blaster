@@ -74,10 +74,18 @@ export default class GameScene extends Phaser.Scene {
       });
 
       // Weapon switching keys
-      this.input.keyboard.on('keydown-ONE', () => this.switchWeapon('pea-shooter'));
-      this.input.keyboard.on('keydown-TWO', () => this.switchWeapon('laser'));
-      this.input.keyboard.on('keydown-THREE', () => this.switchWeapon('shotgun'));
-      this.input.keyboard.on('keydown-FOUR', () => this.switchWeapon('missiles'));
+      this.input.keyboard.on('keydown-ONE', () => {
+        if (!this.scene.isPaused()) this.switchWeapon('pea-shooter');
+      });
+      this.input.keyboard.on('keydown-TWO', () => {
+        if (!this.scene.isPaused()) this.switchWeapon('laser');
+      });
+      this.input.keyboard.on('keydown-THREE', () => {
+        if (!this.scene.isPaused()) this.switchWeapon('shotgun');
+      });
+      this.input.keyboard.on('keydown-FOUR', () => {
+        if (!this.scene.isPaused()) this.switchWeapon('missiles');
+      });
     }
 
     // Create always-visible sound toggle buttons

@@ -5,7 +5,7 @@ import type { PowerUpType } from '../types';
 export class Powerups {
   private scene: Phaser.Scene;
   private player: Player;
-  private activeEffects: Map<PowerUpType, number> = new Map();
+  private activeEffects: Map<PowerUpType, Phaser.Time.TimerEvent> = new Map();
   private baseCooldown: number = 160;
 
   constructor(scene: Phaser.Scene, player: Player) {
@@ -82,7 +82,7 @@ export class Powerups {
     // Cancel existing timer if any
     const existingTimer = this.activeEffects.get(type);
     if (existingTimer) {
-      this.scene.time.removeEvent(existingTimer as any);
+      this.scene.time.removeEvent(existingTimer);
     }
 
     // Start new timer
@@ -90,7 +90,7 @@ export class Powerups {
       this.deactivate(type);
     });
 
-    this.activeEffects.set(type, timer.getElapsed());
+    this.activeEffects.set(type, timer);
   }
 
   private deactivate(type: PowerUpType): void {

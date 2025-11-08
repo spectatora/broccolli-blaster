@@ -1,7 +1,5 @@
-import Phaser from 'phaser';
-
 /**
- * Simple sound manager using Phaser's built-in audio
+ * Simple sound manager using Web Audio API
  * Creates procedurally generated sound effects and background music
  * Singleton pattern for global access
  */
@@ -10,14 +8,11 @@ export class SoundManager {
   private enabled: boolean = true;
   private musicEnabled: boolean = true;
   private audioContext?: AudioContext;
-  private currentMusic?: { oscillators: OscillatorNode[]; gains: GainNode[] };
+  private currentMusic?: { oscillators: OscillatorNode[]; gains: GainNode[]; timeoutId?: number };
   private musicType: 'gameplay' | 'quiz' | null = null;
   private lastMusicType: 'gameplay' | 'quiz' | null = null; // Track last music type for resume
 
-  constructor(scene?: Phaser.Scene) {
-    // Scene reference kept for future audio loading
-    scene;
-    
+  constructor() {
     // Return existing instance if available
     if (SoundManager.instance) {
       return SoundManager.instance;
@@ -110,22 +105,23 @@ export class SoundManager {
    * Generate a simple tone using Web Audio API
    */
   private playTone(frequency: number, duration: number, volume: number = 0.1, type: OscillatorType = 'sine'): void {
+    if (!this.audioContext) return;
+    
     try {
-      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
-      const oscillator = audioContext.createOscillator();
-      const gainNode = audioContext.createGain();
+      const oscillator = this.audioContext.createOscillator();
+      const gainNode = this.audioContext.createGain();
 
       oscillator.connect(gainNode);
-      gainNode.connect(audioContext.destination);
+      gainNode.connect(this.audioContext.destination);
 
       oscillator.frequency.value = frequency;
       oscillator.type = type;
 
-      gainNode.gain.setValueAtTime(volume, audioContext.currentTime);
-      gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + duration);
+      gainNode.gain.setValueAtTime(volume, this.audioContext.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.001, this.audioContext.currentTime + duration);
 
-      oscillator.start(audioContext.currentTime);
-      oscillator.stop(audioContext.currentTime + duration);
+      oscillator.start(this.audioContext.currentTime);
+      oscillator.stop(this.audioContext.currentTime + duration);
     } catch (e) {
       console.warn('Audio playback failed:', e);
     }
@@ -135,23 +131,24 @@ export class SoundManager {
    * Generate a frequency sweep (for explosions)
    */
   private playSweep(startFreq: number, endFreq: number, duration: number, volume: number = 0.2): void {
+    if (!this.audioContext) return;
+    
     try {
-      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
-      const oscillator = audioContext.createOscillator();
-      const gainNode = audioContext.createGain();
+      const oscillator = this.audioContext.createOscillator();
+      const gainNode = this.audioContext.createGain();
 
       oscillator.connect(gainNode);
-      gainNode.connect(audioContext.destination);
+      gainNode.connect(this.audioContext.destination);
 
-      oscillator.frequency.setValueAtTime(startFreq, audioContext.currentTime);
-      oscillator.frequency.exponentialRampToValueAtTime(endFreq, audioContext.currentTime + duration);
+      oscillator.frequency.setValueAtTime(startFreq, this.audioContext.currentTime);
+      oscillator.frequency.exponentialRampToValueAtTime(endFreq, this.audioContext.currentTime + duration);
       oscillator.type = 'sawtooth';
 
-      gainNode.gain.setValueAtTime(volume, audioContext.currentTime);
-      gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + duration);
+      gainNode.gain.setValueAtTime(volume, this.audioContext.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.001, this.audioContext.currentTime + duration);
 
-      oscillator.start(audioContext.currentTime);
-      oscillator.stop(audioContext.currentTime + duration);
+      oscillator.start(this.audioContext.currentTime);
+      oscillator.stop(this.audioContext.currentTime + duration);
     } catch (e) {
       console.warn('Audio playback failed:', e);
     }
@@ -241,6 +238,11 @@ export class SoundManager {
    */
   stopMusic(): void {
     if (this.currentMusic) {
+      // Clear timeout to prevent music from restarting
+      if (this.currentMusic.timeoutId) {
+        clearTimeout(this.currentMusic.timeoutId);
+      }
+      
       this.currentMusic.oscillators.forEach(osc => {
         try {
           osc.stop();
@@ -307,13 +309,17 @@ export class SoundManager {
     const loopDuration = melody.length * noteLength;
     const scheduleNextLoop = () => {
       if (this.musicType && this.currentMusic) {
-        setTimeout(() => {
+        const timeoutId = setTimeout(() => {
           if (this.musicType === 'gameplay') {
             this.startGameplayMusic();
           } else if (this.musicType === 'quiz') {
             this.startQuizMusic();
           }
         }, (loopDuration - 0.1) * 1000); // Slight overlap for seamless loop
+        
+        if (this.currentMusic) {
+          this.currentMusic.timeoutId = timeoutId;
+        }
       }
     };
 
@@ -396,13 +402,17 @@ export class SoundManager {
     const loopDuration = melody.length * noteLength + beat * 0.03; // Account for swing
     const scheduleNextLoop = () => {
       if (this.musicType && this.currentMusic) {
-        setTimeout(() => {
+        const timeoutId = setTimeout(() => {
           if (this.musicType === 'gameplay') {
             this.startGameplayMusic();
           } else if (this.musicType === 'quiz') {
             this.startQuizMusic();
           }
         }, loopDuration * 1000);
+        
+        if (this.currentMusic) {
+          this.currentMusic.timeoutId = timeoutId;
+        }
       }
     };
 
